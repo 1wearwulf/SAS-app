@@ -1,0 +1,59 @@
+# Flutter/Dart
+.dart_tool/
+.packages/
+build/
+pubspec.lock
+*.iml
+*.lock
+.DS_Store
+*.swp
+.sass-cache/
+connect.lock
+*.orig
+*.pyc
+*.pyo
+*.mo
+*.pot
+*.log
+*.pid
+npm-debug.log*
+
+# Android
+android/local.properties
+android/*.iml
+android/.gradle
+android/.idea
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/.generated/
+ios/Flutter/Flutter.podspec
+Podfile.lock
+
+# Web
+.web_build/
+.web/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
+firebase_options.dart
+.env
+*.key
+*.p8
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Mac
+.DS_Store
