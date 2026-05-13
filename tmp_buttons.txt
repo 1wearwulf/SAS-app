@@ -1,0 +1,86 @@
+            // Manual Attendance Button
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    builder: (context) => SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.8,
+                      child: ManualAttendanceMarker(
+                        courseCode: session['courseCode'],
+                        courseName: session['courseName'],
+                        onAttendanceMarked: () {},
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.edit_note),
+                label: const Text('Manual Attendance'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Broadcast Button
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      contentPadding: EdgeInsets.zero,
+                      content: BroadcastNotification(
+                        courseCode: session['courseCode'],
+                        courseName: session['courseName'],
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.broadcast_on_personal),
+                label: const Text('Broadcast Notification'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Send Quiz Button
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      contentPadding: EdgeInsets.zero,
+                      content: QuizComposer(
+                        courseCode: session['courseCode'],
+                        courseName: session['courseName'],
+                        onQuizSent: () {},
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.quiz),
+                label: const Text('Send Quiz'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),

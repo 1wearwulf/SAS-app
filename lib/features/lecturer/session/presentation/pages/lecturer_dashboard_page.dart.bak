@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../widgets/start_session_modal.dart';
 import '../widgets/course_overview_card.dart';
 import '../widgets/at_risk_students_card.dart';
@@ -7,7 +8,10 @@ import '../widgets/qr_modal.dart';
 import '../widgets/access_code_panel.dart';
 import '../widgets/manual_attendance_marker.dart';
 import '../widgets/live_attendance_list.dart';
+import '../widgets/lecturer_app_bar.dart';
+import '../../analytics/presentation/pages/lecturer_analytics_page.dart';
 import '../../domain/entities/session_config.dart';
+
 
 class LecturerDashboardPage extends StatefulWidget {
   const LecturerDashboardPage({super.key});
@@ -50,7 +54,8 @@ class _LecturerDashboardPageState extends State<LecturerDashboardPage> {
     _presentCount = 0;
     _totalStudents = _courses.firstWhere((c) => c['code'] == config.courseCode)['students'];
     
-    final manualCode = "${config.courseCode}_${DateTime.now().millisecondsSinceEpoch}".substring(0, 6).toUpperCase();
+    final qrData = "${config.courseCode}_${DateTime.now().millisecondsSinceEpoch}_${config.durationMinutes}min";
+    final manualCode = qrData.length > 6 ? qrData.substring(0, 6).toUpperCase() : qrData.toUpperCase();
     
     setState(() {
       _hasActiveSession = true;
@@ -63,6 +68,10 @@ class _LecturerDashboardPageState extends State<LecturerDashboardPage> {
         "startedAt": DateTime.now(),
         "expiresAt": expiresAt,
         "qrCode": manualCode,
+        "enableGeofencing": config.enableGeofencing,
+        "enableWifiVerification": config.enableWifiVerification,
+        "allowedSsid": config.allowedSsid,
+        "geofenceRadius": config.geofenceRadius,
       };
     });
     
@@ -107,6 +116,48 @@ class _LecturerDashboardPageState extends State<LecturerDashboardPage> {
     );
   }
 
+  void _exportAttendance() async {
+    if (_activeSession == null) return;
+    
+    final students = _courses.isNotEmpty 
+        ? _courses.map((course) => ({
+            'id': 'CS/2021/00xx',
+            'name': 'Sample Student',
+            'attended': false,
+          })).toList()
+        : [];
+    
+    _showComingSoon(context); // 
+      courseName: _activeSession!['courseName'],
+      courseCode: _activeSession!['courseCode'],
+      sessionDate: '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+      sessionTime: '${DateTime.now().hour}:${DateTime.now().minute}',
+      room: _activeSession!['room'],
+      duration: _activeSession!['durationMinutes'],
+      students: students,
+      presentCount: _presentCount,
+    );
+  }
+
+  void _navigateToAnalytics() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LecturerAnalyticsPage()),
+    );
+  }
+
+  void _navigateToProfile() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Profile page coming soon')),
+    );
+  }
+
+  void _navigateToSettings() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Settings page coming soon')),
+    );
+  }
+
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final minutes = twoDigits(duration.inMinutes.remainder(60));
@@ -123,30 +174,14 @@ class _LecturerDashboardPageState extends State<LecturerDashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            const Text('Faculty Command Center'),
-            if (_hasActiveSession)
-              Container(
-                margin: const EdgeInsets.only(left: 12),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(20)),
-                child: const Text('LIVE', style: TextStyle(color: Colors.white, fontSize: 10)),
-              ),
-          ],
-        ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 0.5,
-        actions: [
-          if (_hasActiveSession)
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _refreshAttendance,
-              tooltip: 'Refresh',
-            ),
-        ],
+      appBar: LecturerAppBar(
+        title: 'Faculty Command Center',
+        hasActiveSession: _hasActiveSession,
+        onRefresh: _refreshAttendance,
+        onExport: _exportAttendance,
+        onProfile: _navigateToProfile,
+        onSettings: _navigateToSettings,
+        onAnalytics: _navigateToAnalytics,
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),
@@ -155,11 +190,16 @@ class _LecturerDashboardPageState extends State<LecturerDashboardPage> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [Colors.blue.shade700, Colors.blue.shade500]),
+              gradient: LinearGradient(
+                colors: [Colors.blue.shade700, Colors.blue.shade500],
+              ),
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Center(
-              child: Text('Welcome Dr. Ochieng', style: TextStyle(color: Colors.white, fontSize: 24)),
+              child: Text(
+                'Welcome Dr. Ochieng',
+                style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w600),
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -182,48 +222,37 @@ class _LecturerDashboardPageState extends State<LecturerDashboardPage> {
           if (_hasActiveSession && _activeSession != null)
             _buildActiveSessionCard()
           else
-            ElevatedButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => StartSessionModal(onStartSession: _startSession),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                minimumSize: const Size(double.infinity, 50),
-              ),
-              child: const Text('Start Session', style: TextStyle(color: Colors.white)),
-            ),
+            _buildStartSessionButton(),
           
           const SizedBox(height: 24),
           
           // Today's Schedule Card
-          Container(
-            decoration: BoxDecoration(color: Colors.white, border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(12)),
-            child: Column(
-              children: [
-                const Padding(padding: EdgeInsets.all(16), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  Text('Today\'s Schedule', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  Text('View all →', style: TextStyle(fontSize: 13, color: Colors.blue)),
-                ])),
-                const Divider(),
-                ..._todaySchedule.map((session) => _ScheduleRow(session: session)),
-              ],
-            ),
-          ),
+          _buildTodayScheduleCard(),
           
           const SizedBox(height: 24),
           
           // Two column layout
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(flex: 6, child: CourseOverviewCard(courses: _courses)),
-              const SizedBox(width: 20),
-              Expanded(flex: 4, child: AtRiskStudentsCard(students: _atRiskStudents)),
-            ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth < 900) {
+                return Column(
+                  children: [
+                    CourseOverviewCard(courses: _courses),
+                    const SizedBox(height: 20),
+                    AtRiskStudentsCard(students: _atRiskStudents),
+                  ],
+                );
+              } else {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 6, child: CourseOverviewCard(courses: _courses)),
+                    const SizedBox(width: 20),
+                    Expanded(flex: 4, child: AtRiskStudentsCard(students: _atRiskStudents)),
+                  ],
+                );
+              }
+            },
           ),
           
           const SizedBox(height: 40),
@@ -238,7 +267,9 @@ class _LecturerDashboardPageState extends State<LecturerDashboardPage> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [Colors.green, Colors.greenAccent]),
+            gradient: const LinearGradient(
+              colors: [Colors.green, Colors.greenAccent],
+            ),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -249,18 +280,48 @@ class _LecturerDashboardPageState extends State<LecturerDashboardPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(_activeSession!['courseCode'], style: const TextStyle(color: Colors.white, fontSize: 12)),
-                      Text(_activeSession!['courseName'], style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                      Text('Room: ${_activeSession!['room']}', style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text(
+                        _activeSession!['courseCode'],
+                        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        _activeSession!['courseName'],
+                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on, size: 12, color: Colors.white70),
+                          const SizedBox(width: 4),
+                          Text(
+                            _activeSession!['room'],
+                            style: const TextStyle(color: Colors.white70, fontSize: 12),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: Colors.white.withAlpha(25), borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withAlpha(25),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: Column(
                       children: [
-                        Text(_formatDuration(_timeRemaining), style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                        const Text('Remaining', style: TextStyle(color: Colors.white70, fontSize: 10)),
+                        Text(
+                          _formatDuration(_timeRemaining),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                        const Text(
+                          'Remaining',
+                          style: TextStyle(color: Colors.white70, fontSize: 10),
+                        ),
                       ],
                     ),
                   ),
@@ -275,7 +336,10 @@ class _LecturerDashboardPageState extends State<LecturerDashboardPage> {
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: Colors.white.withAlpha(25), borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(25),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -304,7 +368,10 @@ class _LecturerDashboardPageState extends State<LecturerDashboardPage> {
                       },
                       icon: const Icon(Icons.qr_code),
                       label: const Text('QR Code'),
-                      style: OutlinedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.green),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.green,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -313,7 +380,9 @@ class _LecturerDashboardPageState extends State<LecturerDashboardPage> {
                       onPressed: () {
                         showModalBottomSheet(
                           context: context,
-                          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
                           builder: (context) => AccessCodePanel(
                             qrCode: _activeSession!['qrCode'],
                             courseCode: _activeSession!['courseCode'],
@@ -322,8 +391,11 @@ class _LecturerDashboardPageState extends State<LecturerDashboardPage> {
                         );
                       },
                       icon: const Icon(Icons.keyboard),
-                      label: const Text('Access Code'),
-                      style: OutlinedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.green),
+                      label: const Text('Access'),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.green,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -333,7 +405,9 @@ class _LecturerDashboardPageState extends State<LecturerDashboardPage> {
                         showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
-                          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
                           builder: (context) => SizedBox(
                             height: MediaQuery.of(context).size.height * 0.85,
                             child: ManualAttendanceMarker(
@@ -351,7 +425,10 @@ class _LecturerDashboardPageState extends State<LecturerDashboardPage> {
                       },
                       icon: const Icon(Icons.edit_note),
                       label: const Text('Manual'),
-                      style: OutlinedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.green),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.green,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -360,7 +437,9 @@ class _LecturerDashboardPageState extends State<LecturerDashboardPage> {
                       onPressed: _endSession,
                       icon: const Icon(Icons.stop),
                       label: const Text('End'),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
                     ),
                   ),
                 ],
@@ -379,18 +458,74 @@ class _LecturerDashboardPageState extends State<LecturerDashboardPage> {
       ],
     );
   }
+  
+  Widget _buildStartSessionButton() {
+    return ElevatedButton(
+      onPressed: () {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => StartSessionModal(onStartSession: _startSession),
+        );
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.green,
+        minimumSize: const Size(double.infinity, 50),
+      ),
+      child: const Text('Start Session', style: TextStyle(color: Colors.white)),
+    );
+  }
+  
+  Widget _buildTodayScheduleCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Today\'s Schedule', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text('View all →', style: TextStyle(fontSize: 13, color: Colors.blue)),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          ..._todaySchedule.map((session) => _ScheduleRow(session: session)),
+        ],
+      ),
+    );
+  }
 }
 
 class _StatCard extends StatelessWidget {
-  final String label, value, trend;
+  final String label;
+  final String value;
+  final String trend;
   final Color color;
-  const _StatCard({required this.label, required this.value, required this.trend, required this.color});
+  
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.trend,
+    required this.color,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: Colors.white, border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -410,13 +545,25 @@ class _AttendanceStat extends StatelessWidget {
   final String label;
   final int count;
   final Color color;
-  const _AttendanceStat({required this.label, required this.count, required this.color});
+  
+  const _AttendanceStat({
+    required this.label,
+    required this.count,
+    required this.color,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text('$count', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
-        Text(label, style: TextStyle(fontSize: 11, color: color.withAlpha(179))),
+        Text(
+          '$count',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
+        ),
+        Text(
+          label,
+          style: TextStyle(fontSize: 11, color: color.withAlpha(179)),
+        ),
       ],
     );
   }
@@ -424,17 +571,28 @@ class _AttendanceStat extends StatelessWidget {
 
 class _ScheduleRow extends StatelessWidget {
   final Map<String, dynamic> session;
+  
   const _ScheduleRow({required this.session});
+
   @override
   Widget build(BuildContext context) {
-    final colors = {'done': Colors.green, 'live': Colors.blue, 'scheduled': Colors.grey};
-    final labels = {'done': 'Done', 'live': 'Live', 'scheduled': 'Scheduled'};
+    final statusColors = {
+      'done': Colors.green,
+      'live': Colors.blue,
+      'scheduled': Colors.grey,
+    };
+    final statusLabels = {
+      'done': 'Done',
+      'live': 'Live',
+      'scheduled': 'Scheduled',
+    };
+    
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
           SizedBox(width: 60, child: Text(session['time'], style: const TextStyle(fontSize: 11, color: Colors.grey))),
-          Container(width: 8, height: 8, decoration: BoxDecoration(color: colors[session['status']], shape: BoxShape.circle)),
+          Container(width: 8, height: 8, decoration: BoxDecoration(color: statusColors[session['status']], shape: BoxShape.circle)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -448,11 +606,23 @@ class _ScheduleRow extends StatelessWidget {
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(color: colors[session['status']]!.withAlpha(25), borderRadius: BorderRadius.circular(20)),
-            child: Text(labels[session['status']]!, style: TextStyle(fontSize: 11, color: colors[session['status']])),
+            decoration: BoxDecoration(
+              color: statusColors[session['status']]!.withAlpha(25),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              statusLabels[session['status']]!,
+              style: TextStyle(fontSize: 11, color: statusColors[session['status']]),
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+void _showComingSoon(BuildContext context) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Export feature coming soon'), duration: Duration(seconds: 1)),
+  );
 }

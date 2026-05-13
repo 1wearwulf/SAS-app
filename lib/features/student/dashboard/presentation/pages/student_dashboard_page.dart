@@ -16,7 +16,7 @@ class StudentDashboardPage extends StatelessWidget {
       "room": "E202",
       "qrExpiresAt": "10:45 AM",
     };
-    
+
     return BlocProvider(
       create: (context) => EnrollmentCubit(),
       child: Scaffold(
@@ -65,43 +65,97 @@ class _GreetingRow extends StatelessWidget {
   const _GreetingRow({required this.name});
   @override
   Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text('Good ${_getTimeOfDay()}, $name 👋', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
-      const SizedBox(height: 4),
-      Text(_getFormattedDate(), style: const TextStyle(fontSize: 13, color: Color(0xFF64748B))),
-    ],
-  );
-  String _getTimeOfDay() { final hour = DateTime.now().hour; if (hour < 12) return 'morning'; if (hour < 17) return 'afternoon'; return 'evening'; }
-  String _getFormattedDate() { final now = DateTime.now(); return '${_getDayName(now.weekday)}, ${_getMonthName(now.month)} ${now.day} · Week 8'; }
-  String _getDayName(int w) => const ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][w - 1];
-  String _getMonthName(int m) => const ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][m - 1];
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Good ${_getTimeOfDay()}, $name 👋',
+              style:
+                  const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
+          const SizedBox(height: 4),
+          Text(_getFormattedDate(),
+              style: const TextStyle(fontSize: 13, color: Color(0xFF64748B))),
+        ],
+      );
+  String _getTimeOfDay() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'morning';
+    if (hour < 17) return 'afternoon';
+    return 'evening';
+  }
+
+  String _getFormattedDate() {
+    final now = DateTime.now();
+    return '${_getDayName(now.weekday)}, ${_getMonthName(now.month)} ${now.day} · Week 8';
+  }
+
+  String _getDayName(int w) => const [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday'
+      ][w - 1];
+  String _getMonthName(int m) => const [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+      ][m - 1];
 }
 
 class _StatsRow extends StatelessWidget {
   const _StatsRow();
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      return Wrap(
-        spacing: 12,
-        runSpacing: 12,
-        children: const [
-          _StatCard(label: 'Overall Attendance', value: '74%', trend: '−3% this week', trendColor: Color(0xFFDC2626)),
-          _StatCard(label: 'Engagement Score', value: '0.61', trend: '+0.04 this week', trendColor: Color(0xFF16A34A)),
-          _StatCard(label: 'Avg Quiz Score', value: '68%', trend: 'Across 4 courses', trendColor: Color(0xFF64748B)),
-          _StatCard(label: 'Sessions Today', value: '3', trend: 'Today\'s schedule', trendColor: Color(0xFF64748B)),
-        ],
+        builder: (context, constraints) {
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: const [
+              _StatCard(
+                  label: 'Overall Attendance',
+                  value: '74%',
+                  trend: '−3% this week',
+                  trendColor: Color(0xFFDC2626)),
+              _StatCard(
+                  label: 'Engagement Score',
+                  value: '0.61',
+                  trend: '+0.04 this week',
+                  trendColor: Color(0xFF16A34A)),
+              _StatCard(
+                  label: 'Avg Quiz Score',
+                  value: '68%',
+                  trend: 'Across 4 courses',
+                  trendColor: Color(0xFF64748B)),
+              _StatCard(
+                  label: 'Sessions Today',
+                  value: '3',
+                  trend: 'Today\'s schedule',
+                  trendColor: Color(0xFF64748B)),
+            ],
+          );
+        },
       );
-    },
-  );
 }
 
 class _StatCard extends StatelessWidget {
   final String label, value, trend;
   final Color trendColor;
-  const _StatCard({required this.label, required this.value, required this.trend, required this.trendColor});
-  
+  const _StatCard(
+      {required this.label,
+      required this.value,
+      required this.trend,
+      required this.trendColor});
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -116,9 +170,12 @@ class _StatCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8))),
+            Text(label,
+                style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8))),
             const SizedBox(height: 8),
-            Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500)),
+            Text(value,
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.w500)),
             const SizedBox(height: 4),
             Text(trend, style: TextStyle(fontSize: 10, color: trendColor)),
           ],
@@ -131,7 +188,7 @@ class _StatCard extends StatelessWidget {
 class _MyCoursesCard extends StatelessWidget {
   final List<Enrollment> enrollments;
   const _MyCoursesCard({required this.enrollments});
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -146,7 +203,8 @@ class _MyCoursesCard extends StatelessWidget {
         children: [
           const Padding(
             padding: EdgeInsets.all(16),
-            child: Text('My Courses', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            child: Text('My Courses',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           ),
           const Divider(height: 1, color: Color(0xFFE2E8F0)),
           Padding(
@@ -154,7 +212,8 @@ class _MyCoursesCard extends StatelessWidget {
             child: Wrap(
               spacing: 12,
               runSpacing: 12,
-              children: enrollments.map((e) => _CourseCard(enrollment: e)).toList(),
+              children:
+                  enrollments.map((e) => _CourseCard(enrollment: e)).toList(),
             ),
           ),
         ],
@@ -166,7 +225,7 @@ class _MyCoursesCard extends StatelessWidget {
 class _CourseCard extends StatelessWidget {
   final Enrollment enrollment;
   const _CourseCard({required this.enrollment});
-  
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -182,18 +241,30 @@ class _CourseCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(enrollment.unitCode, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Color(0xFF94A3B8))),
+            Text(enrollment.unitCode,
+                style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF94A3B8))),
             const SizedBox(height: 4),
-            Text(enrollment.unitName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500), maxLines: 1),
+            Text(enrollment.unitName,
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                maxLines: 1),
             const SizedBox(height: 4),
-            Text(enrollment.lecturer, style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)), maxLines: 1),
+            Text(enrollment.lecturer,
+                style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                maxLines: 1),
             const SizedBox(height: 8),
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: enrollment.isDeferred ? const Color(0xFFD97706).withAlpha(25) : const Color(0xFF16A34A).withAlpha(25),
+                    color: enrollment.isDeferred
+                        ? const Color(0xFFD97706).withAlpha(25)
+                        : const Color(0xFF16A34A).withAlpha(25),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -201,12 +272,16 @@ class _CourseCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.w600,
-                      color: enrollment.isDeferred ? const Color(0xFFD97706) : const Color(0xFF16A34A),
+                      color: enrollment.isDeferred
+                          ? const Color(0xFFD97706)
+                          : const Color(0xFF16A34A),
                     ),
                   ),
                 ),
                 const Spacer(),
-                Text('Year ${enrollment.year}', style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8))),
+                Text('Year ${enrollment.year}',
+                    style: const TextStyle(
+                        fontSize: 10, color: Color(0xFF94A3B8))),
               ],
             ),
           ],
@@ -214,11 +289,12 @@ class _CourseCard extends StatelessWidget {
       ),
     );
   }
-  
+
   void _showCourseDetail(BuildContext context, Enrollment enrollment) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) => Container(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -233,16 +309,21 @@ class _CourseCard extends StatelessWidget {
                     color: const Color(0xFF1D4ED8).withAlpha(25),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text(enrollment.unitCode, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  child: Text(enrollment.unitCode,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 18)),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(enrollment.unitName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text(enrollment.unitName,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
-                      Text(enrollment.lecturer, style: TextStyle(color: Colors.grey[600])),
+                      Text(enrollment.lecturer,
+                          style: TextStyle(color: Colors.grey[600])),
                     ],
                   ),
                 ),
@@ -251,7 +332,9 @@ class _CourseCard extends StatelessWidget {
             const SizedBox(height: 20),
             const Divider(),
             const SizedBox(height: 10),
-            _InfoRow(label: 'Status', value: enrollment.isDeferred ? 'Deferred' : 'Active'),
+            _InfoRow(
+                label: 'Status',
+                value: enrollment.isDeferred ? 'Deferred' : 'Active'),
             _InfoRow(label: 'Year', value: 'Year ${enrollment.year}'),
             _InfoRow(label: 'Semester', value: enrollment.semester),
             _InfoRow(label: 'Attendance', value: '74%'),
@@ -275,14 +358,17 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
   const _InfoRow({required this.label, required this.value});
-  
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          SizedBox(width: 100, child: Text(label, style: const TextStyle(color: Color(0xFF64748B)))),
+          SizedBox(
+              width: 100,
+              child: Text(label,
+                  style: const TextStyle(color: Color(0xFF64748B)))),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
         ],
       ),

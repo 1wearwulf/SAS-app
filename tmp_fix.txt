@@ -1,0 +1,12 @@
+            if (!_hasActiveSession) ...[
+              _NoActiveSessionCard(onStart: () {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => StartSessionModal(
+                    onStartSession: _startSession,
+                  ),
+                );
+              }),
+              const SizedBox(height: 24),
+            ],

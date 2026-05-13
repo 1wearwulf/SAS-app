@@ -22,7 +22,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignOutRequested>(_onSignOutRequested);
     on<AuthCheckStatusRequested>(_onCheckStatusRequested);
     
-    // Check initial status
     add(AuthCheckStatusRequested());
   }
   
