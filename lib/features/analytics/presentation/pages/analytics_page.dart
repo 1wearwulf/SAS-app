@@ -25,9 +25,12 @@ class AnalyticsPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Attendance Trend', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text('Attendance Trend',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    const Text('Last 7 weeks', style: TextStyle(color: Color(0xFF64748B))),
+                    const Text('Last 7 weeks',
+                        style: TextStyle(color: Color(0xFF64748B))),
                     const SizedBox(height: 20),
                     SizedBox(
                       height: 200,
@@ -40,9 +43,19 @@ class AnalyticsPage extends StatelessWidget {
                               sideTitles: SideTitles(
                                 showTitles: true,
                                 getTitlesWidget: (value, meta) {
-                                  const weeks = ['W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9'];
-                                  if (value.toInt() >= 0 && value.toInt() < weeks.length) {
-                                    return Text(weeks[value.toInt()], style: const TextStyle(fontSize: 10));
+                                  const weeks = [
+                                    'W3',
+                                    'W4',
+                                    'W5',
+                                    'W6',
+                                    'W7',
+                                    'W8',
+                                    'W9'
+                                  ];
+                                  if (value.toInt() >= 0 &&
+                                      value.toInt() < weeks.length) {
+                                    return Text(weeks[value.toInt()],
+                                        style: const TextStyle(fontSize: 10));
                                   }
                                   return const Text('');
                                 },
@@ -53,16 +66,20 @@ class AnalyticsPage extends StatelessWidget {
                               sideTitles: SideTitles(
                                 showTitles: true,
                                 getTitlesWidget: (value, meta) {
-                                  return Text('${value.toInt()}%', style: const TextStyle(fontSize: 10));
+                                  return Text('${value.toInt()}%',
+                                      style: const TextStyle(fontSize: 10));
                                 },
                                 reservedSize: 32,
                               ),
                             ),
-                            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                            topTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false)),
+                            rightTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false)),
                           ),
                           borderData: FlBorderData(show: false),
-                          gridData: FlGridData(show: true, drawHorizontalLine: true),
+                          gridData: const FlGridData(
+                              show: true, drawHorizontalLine: true),
                           barGroups: [
                             _makeBarData(0, 68, const Color(0xFF1D4ED8)),
                             _makeBarData(1, 72, const Color(0xFF1D4ED8)),
@@ -80,7 +97,7 @@ class AnalyticsPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Course Performance
             Card(
               child: Padding(
@@ -88,21 +105,27 @@ class AnalyticsPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Course Performance', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text('Course Performance',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 16),
-                    _buildPerformanceRow('CS401 - Software Engineering', 65, const Color(0xFFDC2626)),
+                    _buildPerformanceRow('CS401 - Software Engineering', 65,
+                        const Color(0xFFDC2626)),
                     const SizedBox(height: 12),
-                    _buildPerformanceRow('CS301 - Data Structures', 88, const Color(0xFF16A34A)),
+                    _buildPerformanceRow(
+                        'CS301 - Data Structures', 88, const Color(0xFF16A34A)),
                     const SizedBox(height: 12),
-                    _buildPerformanceRow('CS302 - Database Systems', 79, const Color(0xFFD97706)),
+                    _buildPerformanceRow('CS302 - Database Systems', 79,
+                        const Color(0xFFD97706)),
                     const SizedBox(height: 12),
-                    _buildPerformanceRow('CS403 - Networks & Security', 91, const Color(0xFF16A34A)),
+                    _buildPerformanceRow('CS403 - Networks & Security', 91,
+                        const Color(0xFF16A34A)),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Quiz Performance
             Card(
               child: Padding(
@@ -110,7 +133,9 @@ class AnalyticsPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Quiz Performance', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text('Quiz Performance',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 16),
                     _buildQuizRow('Software Engineering Ch.7', 75),
                     _buildQuizRow('Data Structures - Trees', 80),
@@ -121,7 +146,7 @@ class AnalyticsPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Risk Assessment Card
             Card(
               child: Padding(
@@ -129,13 +154,18 @@ class AnalyticsPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Risk Assessment', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text('Risk Assessment',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 16),
-                    _buildRiskRow('Attendance Risk', 0.74, const Color(0xFFD97706)),
+                    _buildRiskRow(
+                        'Attendance Risk', 0.74, const Color(0xFFD97706)),
                     const SizedBox(height: 12),
-                    _buildRiskRow('Engagement Risk', 0.61, const Color(0xFFD97706)),
+                    _buildRiskRow(
+                        'Engagement Risk', 0.61, const Color(0xFFD97706)),
                     const SizedBox(height: 12),
-                    _buildRiskRow('Performance Risk', 0.68, const Color(0xFFD97706)),
+                    _buildRiskRow(
+                        'Performance Risk', 0.68, const Color(0xFFD97706)),
                     const SizedBox(height: 16),
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -143,16 +173,19 @@ class AnalyticsPage extends StatelessWidget {
                         color: const Color(0xFFD97706).withAlpha(25),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Row(
+                      child: const Row(
                         children: [
-                          const Icon(Icons.warning_amber, color: Color(0xFFD97706)),
-                          const SizedBox(width: 12),
+                          Icon(Icons.warning_amber, color: Color(0xFFD97706)),
+                          SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Recommended Action', style: TextStyle(fontWeight: FontWeight.bold)),
-                                const Text('CS401 attendance is below 75%. Attend upcoming sessions to improve.'),
+                                Text('Recommended Action',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                Text(
+                                    'CS401 attendance is below 75%. Attend upcoming sessions to improve.'),
                               ],
                             ),
                           ),
@@ -169,7 +202,7 @@ class AnalyticsPage extends StatelessWidget {
       ),
     );
   }
-  
+
   BarChartGroupData _makeBarData(int x, double y, Color color) {
     return BarChartGroupData(
       x: x,
@@ -183,7 +216,7 @@ class AnalyticsPage extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildPerformanceRow(String course, int percentage, Color color) {
     return Column(
       children: [
@@ -191,7 +224,9 @@ class AnalyticsPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(child: Text(course, style: const TextStyle(fontSize: 13))),
-            Text('$percentage%', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: color)),
+            Text('$percentage%',
+                style: TextStyle(
+                    fontSize: 13, fontWeight: FontWeight.bold, color: color)),
           ],
         ),
         const SizedBox(height: 4),
@@ -207,7 +242,7 @@ class AnalyticsPage extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildQuizRow(String quiz, int score) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -229,7 +264,7 @@ class AnalyticsPage extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildRiskRow(String label, double value, Color color) {
     final percent = (value * 100).toInt();
     return Column(
@@ -238,7 +273,9 @@ class AnalyticsPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(label, style: const TextStyle(fontSize: 13)),
-            Text('$percent%', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: color)),
+            Text('$percent%',
+                style: TextStyle(
+                    fontSize: 13, fontWeight: FontWeight.bold, color: color)),
           ],
         ),
         const SizedBox(height: 4),

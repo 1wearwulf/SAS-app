@@ -5,6 +5,7 @@ class ManualAttendanceMarker extends StatefulWidget {
   final String courseName;
   final int totalStudents;
   final Function(Map<String, dynamic> student) onMarkAttendance;
+  final Function(List<Map<String, dynamic>> students) onBulkMarkAttendance;
   
   const ManualAttendanceMarker({
     super.key,
@@ -12,6 +13,7 @@ class ManualAttendanceMarker extends StatefulWidget {
     required this.courseName,
     required this.totalStudents,
     required this.onMarkAttendance,
+    required this.onBulkMarkAttendance,
   });
 
   @override
@@ -21,28 +23,79 @@ class ManualAttendanceMarker extends StatefulWidget {
 class _ManualAttendanceMarkerState extends State<ManualAttendanceMarker> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  String? _justification;
+  final TextEditingController _justificationController = TextEditingController();
   
-  // Mock students data
-  final List<Map<String, dynamic>> _allStudents = [
-    {"id": "CS/2021/0042", "name": "Amara Mwangi", "email": "amara@university.edu", "attended": false, "department": "CS"},
-    {"id": "CS/2021/0043", "name": "Brian Odhiambo", "email": "brian@university.edu", "attended": false, "department": "CS"},
-    {"id": "CS/2021/0044", "name": "Catherine Wanjiku", "email": "catherine@university.edu", "attended": false, "department": "CS"},
-    {"id": "CS/2021/0045", "name": "David Omondi", "email": "david@university.edu", "attended": false, "department": "CS"},
-    {"id": "CS/2021/0046", "name": "Esther Muthoni", "email": "esther@university.edu", "attended": false, "department": "CS"},
-    {"id": "CS/2021/0047", "name": "Francis Kimani", "email": "francis@university.edu", "attended": true, "department": "CS"},
-    {"id": "CS/2021/0048", "name": "Grace Atieno", "email": "grace@university.edu", "attended": true, "department": "CS"},
-  ];
+  // Generate realistic student list based on totalStudents
+  late List<Map<String, dynamic>> _students;
+  
+  @override
+  void initState() {
+    super.initState();
+    _generateStudentList();
+  }
+  
+  void _generateStudentList() {
+    _students = List.generate(widget.totalStudents, (index) {
+      final studentNum = 1000 + index;
+      return {
+        "id": "CS/2021/${studentNum.toString().padLeft(4, '0')}",
+        "name": _getRandomName(index),
+        "email": "student$studentNum@university.edu",
+        "attended": false,
+        "department": "CS",
+      };
+    });
+  }
+  
+  String _getRandomName(int index) {
+    final firstNames = ["Amara", "Brian", "Catherine", "David", "Esther", "Francis", "Grace", "Henry", "Ivy", "James", "Kelly", "Lewis", "Mary", "Nathan", "Olivia"];
+    final lastNames = ["Mwangi", "Odhiambo", "Wanjiku", "Omondi", "Muthoni", "Kimani", "Atieno", "Kamau", "Njeri", "Otieno", "Wambui", "Kipchoge", "Achieng", "Ochieng", "Wanjala"];
+    return "${firstNames[index % firstNames.length]} ${lastNames[index % lastNames.length]}";
+  }
 
   List<Map<String, dynamic>> get _filteredStudents {
-    if (_searchQuery.isEmpty) return _allStudents;
-    return _allStudents.where((student) =>
+    if (_searchQuery.isEmpty) return _students;
+    return _students.where((student) =>
       student['id'].toLowerCase().contains(_searchQuery.toLowerCase()) ||
       student['name'].toLowerCase().contains(_searchQuery.toLowerCase()) ||
       student['email'].toLowerCase().contains(_searchQuery.toLowerCase())
     ).toList();
   }
 
-  int get _presentCount => _allStudents.where((s) => s['attended']).length;
+  int get _presentCount => _students.where((s) => s['attended']).length;
+
+  void _markAllPresent() {
+    setState(() {
+      for (var student in _students) {
+        if (!student['attended']) {
+          student['attended'] = true;
+          widget.onMarkAttendance(student);
+        }
+      }
+    });
+    widget.onBulkMarkAttendance(_students.where((s) => s['attended']).toList());
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('All students marked present'), backgroundColor: Colors.green),
+    );
+  }
+
+  void _saveAttendance() {
+    if (_justificationController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please provide a justification for manual attendance'), backgroundColor: Colors.orange),
+      );
+      return;
+    }
+    
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Attendance saved: $_presentCount/${widget.totalStudents} students marked'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,17 +107,7 @@ class _ManualAttendanceMarkerState extends State<ManualAttendanceMarker> {
         elevation: 0,
         actions: [
           TextButton.icon(
-            onPressed: () {
-              setState(() {
-                for (var student in _allStudents) {
-                  student['attended'] = true;
-                  widget.onMarkAttendance(student);
-                }
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('All students marked present'), backgroundColor: Colors.green),
-              );
-            },
+            onPressed: _markAllPresent,
             icon: const Icon(Icons.done_all, size: 20),
             label: const Text('Mark All'),
           ),
@@ -108,9 +151,7 @@ class _ManualAttendanceMarkerState extends State<ManualAttendanceMarker> {
                         },
                       )
                     : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
               onChanged: (value) {
                 setState(() {
@@ -130,8 +171,6 @@ class _ManualAttendanceMarkerState extends State<ManualAttendanceMarker> {
                         Icon(Icons.person_off, size: 48, color: Colors.grey),
                         SizedBox(height: 8),
                         Text('No students found'),
-                        SizedBox(height: 4),
-                        Text('Try a different search term', style: TextStyle(fontSize: 12, color: Colors.grey)),
                       ],
                     ),
                   )
@@ -147,12 +186,6 @@ class _ManualAttendanceMarkerState extends State<ManualAttendanceMarker> {
                             student['attended'] = !student['attended'];
                             widget.onMarkAttendance(student);
                           });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('${student['name']} marked ${student['attended'] ? "present" : "absent"}'),
-                              duration: const Duration(seconds: 1),
-                            ),
-                          );
                         },
                       );
                     },
@@ -168,12 +201,16 @@ class _ManualAttendanceMarkerState extends State<ManualAttendanceMarker> {
             ),
             child: Column(
               children: [
-                const TextField(
+                TextField(
+                  controller: _justificationController,
                   maxLines: 2,
                   decoration: InputDecoration(
                     hintText: 'Justification for manual override (e.g., Student had technical issues)',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    errorText: _justification != null && _justificationController.text.isEmpty
+                        ? 'Justification is required'
+                        : null,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -188,15 +225,7 @@ class _ManualAttendanceMarkerState extends State<ManualAttendanceMarker> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Attendance saved: $_presentCount/${widget.totalStudents} students marked'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        },
+                        onPressed: _saveAttendance,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
                         ),

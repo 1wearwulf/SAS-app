@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class LiveAttendanceList extends StatefulWidget {
   final String courseCode;
   final int totalStudents;
-  
+
   const LiveAttendanceList({
     super.key,
     required this.courseCode,
@@ -16,11 +16,35 @@ class LiveAttendanceList extends StatefulWidget {
 
 class _LiveAttendanceListState extends State<LiveAttendanceList> {
   // Mock live attendance data - would come from Firestore stream
-  List<Map<String, dynamic>> _attendedStudents = [
-    {"id": "CS/2021/0042", "name": "Amara Mwangi", "time": "10:02 AM", "method": "QR", "risk": "safe"},
-    {"id": "CS/2021/0043", "name": "Brian Odhiambo", "time": "10:05 AM", "method": "Manual", "risk": "safe"},
-    {"id": "CS/2021/0046", "name": "Esther Muthoni", "time": "10:08 AM", "method": "QR", "risk": "warning"},
-    {"id": "CS/2021/0047", "name": "Francis Kimani", "time": "10:10 AM", "method": "QR", "risk": "safe"},
+  final List<Map<String, dynamic>> _attendedStudents = [
+    {
+      "id": "CS/2021/0042",
+      "name": "Amara Mwangi",
+      "time": "10:02 AM",
+      "method": "QR",
+      "risk": "safe"
+    },
+    {
+      "id": "CS/2021/0043",
+      "name": "Brian Odhiambo",
+      "time": "10:05 AM",
+      "method": "Manual",
+      "risk": "safe"
+    },
+    {
+      "id": "CS/2021/0046",
+      "name": "Esther Muthoni",
+      "time": "10:08 AM",
+      "method": "QR",
+      "risk": "warning"
+    },
+    {
+      "id": "CS/2021/0047",
+      "name": "Francis Kimani",
+      "time": "10:10 AM",
+      "method": "QR",
+      "risk": "safe"
+    },
   ];
 
   final ScrollController _scrollController = ScrollController();
@@ -48,43 +72,70 @@ class _LiveAttendanceListState extends State<LiveAttendanceList> {
                     const SizedBox(width: 8),
                     Text(
                       'Live Attendance (${_attendedStudents.length}/${widget.totalStudents})',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.green.withAlpha(25),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Text(
                     'LIVE',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.green),
+                    style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green),
                   ),
                 ),
               ],
             ),
           ),
           const Divider(height: 1),
-          
+
           // Table headers
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
-                const SizedBox(width: 40),
-                const Expanded(
-                  child: Text('Student', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey)),
+                SizedBox(width: 40),
+                Expanded(
+                  child: Text('Student',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey)),
                 ),
-                SizedBox(width: 60, child: Text('Time', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey))),
-                SizedBox(width: 70, child: Text('Method', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey))),
-                SizedBox(width: 60, child: Text('Risk', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey))),
+                SizedBox(
+                    width: 60,
+                    child: Text('Time',
+                        style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey))),
+                SizedBox(
+                    width: 70,
+                    child: Text('Method',
+                        style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey))),
+                SizedBox(
+                    width: 60,
+                    child: Text('Risk',
+                        style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey))),
               ],
             ),
           ),
           const Divider(height: 1),
-          
+
           // Scrollable list
           Expanded(
             child: ListView.builder(
@@ -96,7 +147,7 @@ class _LiveAttendanceListState extends State<LiveAttendanceList> {
               },
             ),
           ),
-          
+
           // Footer with auto-scroll toggle
           Container(
             padding: const EdgeInsets.all(12),
@@ -109,7 +160,8 @@ class _LiveAttendanceListState extends State<LiveAttendanceList> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.auto_awesome, size: 14, color: Colors.grey),
+                    const Icon(Icons.auto_awesome,
+                        size: 14, color: Colors.grey),
                     const SizedBox(width: 4),
                     Text(
                       'Auto-scroll: ON',
@@ -132,14 +184,14 @@ class _LiveAttendanceListState extends State<LiveAttendanceList> {
 
 class _AttendanceRow extends StatelessWidget {
   final Map<String, dynamic> student;
-  
+
   const _AttendanceRow({required this.student});
 
   @override
   Widget build(BuildContext context) {
     final riskColor = student['risk'] == 'safe' ? Colors.green : Colors.orange;
     final methodColor = student['method'] == 'QR' ? Colors.blue : Colors.purple;
-    
+
     return Container(
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
@@ -153,7 +205,10 @@ class _AttendanceRow extends StatelessWidget {
               backgroundColor: Colors.blue.withAlpha(25),
               child: Text(
                 student['name'].split(' ').map((s) => s[0]).join(''),
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blue),
+                style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue),
               ),
             ),
             const SizedBox(width: 12),
@@ -163,7 +218,8 @@ class _AttendanceRow extends StatelessWidget {
                 children: [
                   Text(
                     student['name'],
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                        fontSize: 13, fontWeight: FontWeight.w500),
                   ),
                   Text(
                     student['id'],
@@ -189,7 +245,10 @@ class _AttendanceRow extends StatelessWidget {
                 ),
                 child: Text(
                   student['method'],
-                  style: TextStyle(fontSize: 10, color: methodColor, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                      fontSize: 10,
+                      color: methodColor,
+                      fontWeight: FontWeight.w600),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -204,7 +263,10 @@ class _AttendanceRow extends StatelessWidget {
                 ),
                 child: Text(
                   student['risk'].toUpperCase(),
-                  style: TextStyle(fontSize: 10, color: riskColor, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                      fontSize: 10,
+                      color: riskColor,
+                      fontWeight: FontWeight.w600),
                   textAlign: TextAlign.center,
                 ),
               ),

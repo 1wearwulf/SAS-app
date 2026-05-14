@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
-import 'features/lecturer/session/presentation/pages/lecturer_dashboard_page.dart';
+import 'features/student/dashboard/presentation/pages/student_dashboard_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Smart Attendance System',
       theme: AppTheme.lightTheme,
-      home: const LecturerDashboardPage(),
+      home: const StudentDashboardPage(),
       debugShowCheckedModeBanner: false,
     );
   }

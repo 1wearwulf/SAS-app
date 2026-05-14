@@ -18,7 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
+  final bool _obscurePassword = true;
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -55,7 +55,8 @@ class _LoginPageState extends State<LoginPage> {
                       color: Colors.blue.shade50,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.school, size: 60, color: Colors.blue),
+                    child:
+                        const Icon(Icons.school, size: 60, color: Colors.blue),
                   ),
                   const SizedBox(height: 24),
                   const Text(
@@ -78,8 +79,10 @@ class _LoginPageState extends State<LoginPage> {
                           keyboardType: TextInputType.emailAddress,
                           prefixIcon: Icons.email,
                           validator: (value) {
-                            if (value == null || value.isEmpty) return 'Please enter your email';
-                            if (!value.contains('@')) return 'Enter a valid email';
+                            if (value == null || value.isEmpty)
+                              return 'Please enter your email';
+                            if (!value.contains('@'))
+                              return 'Enter a valid email';
                             return null;
                           },
                         ),
@@ -90,8 +93,10 @@ class _LoginPageState extends State<LoginPage> {
                           obscureText: _obscurePassword,
                           prefixIcon: Icons.lock,
                           validator: (value) {
-                            if (value == null || value.isEmpty) return 'Please enter your password';
-                            if (value.length < 6) return 'Password must be at least 6 characters';
+                            if (value == null || value.isEmpty)
+                              return 'Please enter your password';
+                            if (value.length < 6)
+                              return 'Password must be at least 6 characters';
                             return null;
                           },
                         ),
@@ -110,18 +115,19 @@ class _LoginPageState extends State<LoginPage> {
                             if (_formKey.currentState!.validate()) {
                               print('LoginPage: Sign in button pressed');
                               context.read<AuthBloc>().add(
-                                AuthSignInRequested(
-                                  email: _emailController.text.trim(),
-                                  password: _passwordController.text,
-                                ),
-                              );
+                                    AuthSignInRequested(
+                                      email: _emailController.text.trim(),
+                                      password: _passwordController.text,
+                                    ),
+                                  );
                             }
                           },
                           isLoading: _isLoading,
                         ),
                         if (_errorMessage != null) ...[
                           const SizedBox(height: 16),
-                          Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+                          Text(_errorMessage!,
+                              style: const TextStyle(color: Colors.red)),
                         ],
                       ],
                     ),
@@ -131,7 +137,8 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text("Don't have an account?"),
-                      TextButton(onPressed: () {}, child: const Text('Sign Up')),
+                      TextButton(
+                          onPressed: () {}, child: const Text('Sign Up')),
                     ],
                   ),
                 ],

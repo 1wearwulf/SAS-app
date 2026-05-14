@@ -117,10 +117,10 @@ class _StatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, constraints) {
-          return Wrap(
+          return const Wrap(
             spacing: 12,
             runSpacing: 12,
-            children: const [
+            children: [
               _StatCard(
                   label: 'Overall Attendance',
                   value: '74%',
@@ -337,8 +337,8 @@ class _CourseCard extends StatelessWidget {
                 value: enrollment.isDeferred ? 'Deferred' : 'Active'),
             _InfoRow(label: 'Year', value: 'Year ${enrollment.year}'),
             _InfoRow(label: 'Semester', value: enrollment.semester),
-            _InfoRow(label: 'Attendance', value: '74%'),
-            _InfoRow(label: 'Next Session', value: 'Today at 10:00 AM'),
+            const _InfoRow(label: 'Attendance', value: '74%'),
+            const _InfoRow(label: 'Next Session', value: 'Today at 10:00 AM'),
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,

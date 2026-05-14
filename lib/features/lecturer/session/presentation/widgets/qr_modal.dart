@@ -2,19 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class QRModal extends StatelessWidget {
-  final String qrCode;
+  final String qrData;
   final String courseCode;
   final String courseName;
   final String room;
   final DateTime expiresAt;
+  final String accessCode;
   
   const QRModal({
     super.key,
-    required this.qrCode,
+    required this.qrData,
     required this.courseCode,
     required this.courseName,
     required this.room,
     required this.expiresAt,
+    required this.accessCode,
   });
 
   @override
@@ -22,6 +24,7 @@ class QRModal extends StatelessWidget {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
+        width: 400,
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -29,14 +32,8 @@ class QRModal extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Attendance QR - $courseCode',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
-                ),
+                Text('QR Code - $courseCode', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
               ],
             ),
             const SizedBox(height: 20),
@@ -47,11 +44,7 @@ class QRModal extends StatelessWidget {
                 border: Border.all(color: Colors.grey.shade300),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: QrImageView(
-                data: qrCode,
-                version: QrVersions.auto,
-                size: 200,
-              ),
+              child: QrImageView(data: qrData, version: QrVersions.auto, size: 200),
             ),
             const SizedBox(height: 16),
             Container(
@@ -62,9 +55,11 @@ class QRModal extends StatelessWidget {
               ),
               child: Column(
                 children: [
+                  const Text('Manual Access Code:', style: TextStyle(fontSize: 12)),
+                  const SizedBox(height: 8),
                   Text(
-                    'Manual Code: $qrCode',
-                    style: const TextStyle(fontSize: 16, fontFamily: 'monospace', fontWeight: FontWeight.bold),
+                    _formatCode(accessCode),
+                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, fontFamily: 'monospace', letterSpacing: 4),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -72,10 +67,7 @@ class QRModal extends StatelessWidget {
                     children: [
                       const Icon(Icons.access_time, size: 14),
                       const SizedBox(width: 4),
-                      Text(
-                        'Valid until: ${expiresAt.hour.toString().padLeft(2, '0')}:${expiresAt.minute.toString().padLeft(2, '0')}',
-                        style: const TextStyle(fontSize: 12),
-                      ),
+                      Text('Valid until: ${expiresAt.hour.toString().padLeft(2, '0')}:${expiresAt.minute.toString().padLeft(2, '0')}'),
                     ],
                   ),
                 ],
@@ -86,13 +78,9 @@ class QRModal extends StatelessWidget {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('QR code saved!')),
-                      );
-                    },
+                    onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('QR saved'))),
                     icon: const Icon(Icons.download),
-                    label: const Text('Download'),
+                    label: const Text('Save QR'),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -109,5 +97,10 @@ class QRModal extends StatelessWidget {
         ),
       ),
     );
+  }
+  
+  String _formatCode(String code) {
+    if (code.length >= 6) return '${code.substring(0, 3)} ${code.substring(3, 6)}';
+    return code.padLeft(6, '0');
   }
 }

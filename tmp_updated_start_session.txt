@@ -1,0 +1,44 @@
+  void _startSession(SessionConfig config) {
+    final expiresAt = DateTime.now().add(Duration(minutes: config.durationMinutes));
+    _timeRemaining = Duration(minutes: config.durationMinutes);
+    _presentCount = 0;
+    _totalStudents = _courses.firstWhere((c) => c['code'] == config.courseCode)['students'];
+    
+    // Generate unified session token
+    final token = SessionToken.generate(config.courseCode, config.durationMinutes);
+    
+    setState(() {
+      _hasActiveSession = true;
+      _activeSession = {
+        "courseCode": config.courseCode,
+        "courseName": config.courseName,
+        "room": config.room,
+        "durationMinutes": config.durationMinutes,
+        "totalStudents": _totalStudents,
+        "startedAt": DateTime.now(),
+        "expiresAt": expiresAt,
+        "qrData": token.qrData,
+        "accessCode": token.accessCode,
+      };
+    });
+    
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_timeRemaining.inSeconds <= 1) {
+          _timer?.cancel();
+          _hasActiveSession = false;
+          _activeSession = null;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Session ended automatically'), backgroundColor: Colors.orange),
+          );
+        } else {
+          _timeRemaining = _timeRemaining - const Duration(seconds: 1);
+        }
+      });
+    });
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Session started for ${config.courseName}!'), backgroundColor: Colors.green),
+    );
+  }

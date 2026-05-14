@@ -8,7 +8,7 @@ import '../../features/analytics/presentation/pages/analytics_page.dart';
 
 class StudentShell extends StatelessWidget {
   final Widget child;
-  
+
   const StudentShell({super.key, required this.child});
 
   @override
@@ -39,19 +39,19 @@ class StudentShell extends StatelessWidget {
       body: child,
     );
   }
-  
+
   void _showSearchDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Search'),
-        content: SizedBox(
+        content: const SizedBox(
           width: 400,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const TextField(
+              TextField(
                 autofocus: true,
                 decoration: InputDecoration(
                   hintText: 'Search courses, materials...',
@@ -59,9 +59,10 @@ class StudentShell extends StatelessWidget {
                   border: OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 16),
-              const Text('Popular searches:', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
+              SizedBox(height: 16),
+              Text('Popular searches:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
               Wrap(
                 spacing: 8,
                 children: [
@@ -75,12 +76,14 @@ class StudentShell extends StatelessWidget {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close')),
         ],
       ),
     );
   }
-  
+
   void _showNotificationsDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -124,7 +127,9 @@ class StudentShell extends StatelessWidget {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close')),
         ],
       ),
     );
@@ -160,23 +165,34 @@ class _Drawer extends StatelessWidget {
                     const CircleAvatar(
                       radius: 30,
                       backgroundColor: Colors.white,
-                      child: Text('AM', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      child: Text('AM',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Amara Mwangi', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                          const Text('CS/2021/0042', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                          const Text('Amara Mwangi',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold)),
+                          const Text('CS/2021/0042',
+                              style: TextStyle(
+                                  color: Colors.white70, fontSize: 12)),
                           const SizedBox(height: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: Colors.white.withAlpha(51),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Text('View Profile', style: TextStyle(color: Colors.white, fontSize: 11)),
+                            child: const Text('View Profile',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 11)),
                           ),
                         ],
                       ),
@@ -223,7 +239,8 @@ class _Drawer extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AnalyticsPage()),
+                  MaterialPageRoute(
+                      builder: (context) => const AnalyticsPage()),
                 );
               },
             ),
@@ -279,8 +296,9 @@ class _Drawer extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _buildDrawerItem(BuildContext context, {
+
+  Widget _buildDrawerItem(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
@@ -291,7 +309,7 @@ class _Drawer extends StatelessWidget {
       onTap: onTap,
     );
   }
-  
+
   void _showComingSoon(BuildContext context, String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
