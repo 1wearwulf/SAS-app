@@ -4,7 +4,7 @@ import '../../domain/entities/session_config.dart';
 
 class StartSessionModal extends StatefulWidget {
   final Function(SessionConfig) onStartSession;
-  
+
   const StartSessionModal({super.key, required this.onStartSession});
 
   @override
@@ -21,23 +21,49 @@ class _StartSessionModalState extends State<StartSessionModal> {
   String _allowedSsid = '';
   bool _isDetectingWifi = false;
   String? _detectedSsid;
-  
+
   final List<Map<String, dynamic>> _courses = [
-    {"code": "CS401", "name": "Software Engineering", "room": "E202", "students": 44},
+    {
+      "code": "CS401",
+      "name": "Software Engineering",
+      "room": "E202",
+      "students": 44
+    },
     {"code": "CS301", "name": "Data Structures", "room": "LH4", "students": 52},
-    {"code": "CS302", "name": "Database Systems", "room": "LH2", "students": 48},
-    {"code": "CS403", "name": "Networks & Security", "room": "E101", "students": 43},
+    {
+      "code": "CS302",
+      "name": "Database Systems",
+      "room": "LH2",
+      "students": 48
+    },
+    {
+      "code": "CS403",
+      "name": "Networks & Security",
+      "room": "E101",
+      "students": 43
+    },
   ];
-  
+
   final List<int> _durationPresets = [1, 2, 5, 10, 15, 30, 45, 60, 90, 120];
-  final List<String> _durationLabels = ['1m', '2m', '5m', '10m', '15m', '30m', '45m', '1h', '1.5h', '2h'];
+  final List<String> _durationLabels = [
+    '1m',
+    '2m',
+    '5m',
+    '10m',
+    '15m',
+    '30m',
+    '45m',
+    '1h',
+    '1.5h',
+    '2h'
+  ];
 
   Future<void> _detectCurrentWifi() async {
     setState(() {
       _isDetectingWifi = true;
       _detectedSsid = null;
     });
-    
+
     try {
       final ssid = await WifiInfo().getWifiName();
       if (ssid != null && ssid.isNotEmpty) {
@@ -48,20 +74,26 @@ class _StartSessionModalState extends State<StartSessionModal> {
         });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Detected WiFi: $cleanSsid'), backgroundColor: Colors.green),
+            SnackBar(
+                content: Text('Detected WiFi: $cleanSsid'),
+                backgroundColor: Colors.green),
           );
         }
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No WiFi detected'), backgroundColor: Colors.orange),
+            const SnackBar(
+                content: Text('No WiFi detected'),
+                backgroundColor: Colors.orange),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to detect WiFi: $e'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('Failed to detect WiFi: $e'),
+              backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -101,7 +133,8 @@ class _StartSessionModalState extends State<StartSessionModal> {
                   const Expanded(
                     child: Text(
                       'Start New Session',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ),
                   IconButton(
@@ -111,16 +144,19 @@ class _StartSessionModalState extends State<StartSessionModal> {
                 ],
               ),
               const SizedBox(height: 24),
-              
+
               // Course Dropdown
-              const Text('Course', style: TextStyle(fontWeight: FontWeight.w500)),
+              const Text('Course',
+                  style: TextStyle(fontWeight: FontWeight.w500)),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: _selectedCourse,
+                initialValue: _selectedCourse,
                 isExpanded: true,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
                 hint: const Text('Select a course'),
                 items: _courses.map((course) {
@@ -128,10 +164,13 @@ class _StartSessionModalState extends State<StartSessionModal> {
                     value: course['code'] as String,
                     child: Row(
                       children: [
-                        Expanded(child: Text('${course['code']} - ${course['name']}')),
+                        Expanded(
+                            child:
+                                Text('${course['code']} - ${course['name']}')),
                         Text(
                           '${course['students']} students',
-                          style: const TextStyle(fontSize: 11, color: Colors.grey),
+                          style:
+                              const TextStyle(fontSize: 11, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -141,16 +180,18 @@ class _StartSessionModalState extends State<StartSessionModal> {
                   setState(() {
                     _selectedCourse = value;
                     if (value != null) {
-                      final course = _courses.firstWhere((c) => c['code'] == value);
+                      final course =
+                          _courses.firstWhere((c) => c['code'] == value);
                       _room = course['room'] as String;
                     }
                   });
                 },
               ),
               const SizedBox(height: 20),
-              
+
               // Duration with presets
-              const Text('Session Duration', style: TextStyle(fontWeight: FontWeight.w500)),
+              const Text('Session Duration',
+                  style: TextStyle(fontWeight: FontWeight.w500)),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -168,26 +209,30 @@ class _StartSessionModalState extends State<StartSessionModal> {
                     },
                     selectedColor: Colors.blue.withAlpha(51),
                     backgroundColor: Colors.white,
-                    side: BorderSide(color: isSelected ? Colors.blue : Colors.grey.shade300),
+                    side: BorderSide(
+                        color: isSelected ? Colors.blue : Colors.grey.shade300),
                   );
                 }),
               ),
               const SizedBox(height: 20),
-              
+
               // Room
-              const Text('Location / Room', style: TextStyle(fontWeight: FontWeight.w500)),
+              const Text('Location / Room',
+                  style: TextStyle(fontWeight: FontWeight.w500)),
               const SizedBox(height: 8),
               TextField(
                 controller: TextEditingController(text: _room),
                 onChanged: (value) => _room = value,
                 decoration: InputDecoration(
                   hintText: 'e.g. LH4, E202, Online',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               ),
               const SizedBox(height: 20),
-              
+
               // Geofencing
               Row(
                 children: [
@@ -198,15 +243,16 @@ class _StartSessionModalState extends State<StartSessionModal> {
                         _enableGeofencing = value;
                       });
                     },
-                    activeColor: Colors.blue,
+                    activeThumbColor: Colors.blue,
                   ),
                   const SizedBox(width: 8),
                   const Expanded(
-                    child: Text('Enable Geofencing', style: TextStyle(fontWeight: FontWeight.w500)),
+                    child: Text('Enable Geofencing',
+                        style: TextStyle(fontWeight: FontWeight.w500)),
                   ),
                 ],
               ),
-              
+
               if (_enableGeofencing) ...[
                 const SizedBox(height: 16),
                 Row(
@@ -229,7 +275,8 @@ class _StartSessionModalState extends State<StartSessionModal> {
                     ),
                     Container(
                       width: 60,
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(6),
@@ -248,9 +295,9 @@ class _StartSessionModalState extends State<StartSessionModal> {
                   style: TextStyle(fontSize: 11, color: Colors.grey),
                 ),
               ],
-              
+
               const SizedBox(height: 20),
-              
+
               // WiFi Verification
               Row(
                 children: [
@@ -265,27 +312,33 @@ class _StartSessionModalState extends State<StartSessionModal> {
                         }
                       });
                     },
-                    activeColor: Colors.blue,
+                    activeThumbColor: Colors.blue,
                   ),
                   const SizedBox(width: 8),
                   const Expanded(
-                    child: Text('Verify WiFi Network', style: TextStyle(fontWeight: FontWeight.w500)),
+                    child: Text('Verify WiFi Network',
+                        style: TextStyle(fontWeight: FontWeight.w500)),
                   ),
                 ],
               ),
-              
+
               if (_enableWifiVerification) ...[
                 const SizedBox(height: 12),
-                
+
                 // Auto-detect button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: _isDetectingWifi ? null : _detectCurrentWifi,
                     icon: _isDetectingWifi
-                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2))
                         : const Icon(Icons.wifi_find, size: 18),
-                    label: Text(_isDetectingWifi ? 'Detecting...' : 'Auto-detect (Mobile only)'),
+                    label: Text(_isDetectingWifi
+                        ? 'Detecting...'
+                        : 'Auto-detect (Mobile only)'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue.shade50,
                       foregroundColor: Colors.blue,
@@ -294,8 +347,9 @@ class _StartSessionModalState extends State<StartSessionModal> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text("Note: WiFi detection works on mobile devices only", style: TextStyle(fontSize: 10, color: Colors.grey)),
-                
+                const Text("Note: WiFi detection works on mobile devices only",
+                    style: TextStyle(fontSize: 10, color: Colors.grey)),
+
                 if (_detectedSsid != null) ...[
                   const SizedBox(height: 8),
                   Container(
@@ -307,7 +361,8 @@ class _StartSessionModalState extends State<StartSessionModal> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.check_circle, color: Colors.green, size: 16),
+                        const Icon(Icons.check_circle,
+                            color: Colors.green, size: 16),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -327,17 +382,19 @@ class _StartSessionModalState extends State<StartSessionModal> {
                     ),
                   ),
                 ],
-                
+
                 const SizedBox(height: 12),
-                
+
                 // Manual SSID entry
                 TextField(
                   onChanged: (value) => _allowedSsid = value,
                   controller: TextEditingController(text: _allowedSsid),
                   decoration: InputDecoration(
                     hintText: 'Or enter WiFi SSID manually',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     prefixIcon: const Icon(Icons.wifi),
                   ),
                 ),
@@ -347,9 +404,9 @@ class _StartSessionModalState extends State<StartSessionModal> {
                   style: TextStyle(fontSize: 11, color: Colors.grey),
                 ),
               ],
-              
+
               const SizedBox(height: 24),
-              
+
               // Buttons
               Row(
                 children: [
@@ -358,7 +415,8 @@ class _StartSessionModalState extends State<StartSessionModal> {
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       child: const Text('Cancel'),
                     ),
@@ -368,16 +426,20 @@ class _StartSessionModalState extends State<StartSessionModal> {
                     child: ElevatedButton(
                       onPressed: _selectedCourse != null
                           ? () {
-                              final course = _courses.firstWhere((c) => c['code'] == _selectedCourse);
+                              final course = _courses.firstWhere(
+                                  (c) => c['code'] == _selectedCourse);
                               final config = SessionConfig(
                                 courseCode: course['code'] as String,
                                 courseName: course['name'] as String,
                                 room: _room,
                                 durationMinutes: _durationMinutes,
-                                geofenceRadius: _enableGeofencing ? _geofenceRadius : 0,
+                                geofenceRadius:
+                                    _enableGeofencing ? _geofenceRadius : 0,
                                 enableGeofencing: _enableGeofencing,
                                 enableWifiVerification: _enableWifiVerification,
-                                allowedSsid: _enableWifiVerification ? _allowedSsid : null,
+                                allowedSsid: _enableWifiVerification
+                                    ? _allowedSsid
+                                    : null,
                               );
                               widget.onStartSession(config);
                               Navigator.pop(context);
@@ -386,7 +448,8 @@ class _StartSessionModalState extends State<StartSessionModal> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       child: const Text('Start Session →'),
                     ),
