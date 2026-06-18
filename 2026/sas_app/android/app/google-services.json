@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "619084402255",
+    "project_id": "sas-app-7661e",
+    "storage_bucket": "sas-app-7661e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:619084402255:android:5fa75e349e5e81005f243a",
+        "android_client_info": {
+          "package_name": "com.example.sas_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "619084402255-9r54v69vcq5kk2rgdc4oqvr1mod3ias8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxloIXtHq8iGLs6rX__gsfHE_Fj5XQhE0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "619084402255-9r54v69vcq5kk2rgdc4oqvr1mod3ias8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "619084402255-mae79mtmjltf3f53mb65n31rr7f7kfm8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.sasApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

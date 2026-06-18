@@ -1,0 +1,640 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../cubit/enrollment_cubit.dart';
+import '../widgets/student_drawer.dart';
+import '../../../attendance/domain/entities/active_session.dart';
+import '../../../attendance/presentation/pages/qr_scanner_page.dart';
+import '../../../attendance/presentation/pages/access_code_entry_page.dart';
+import '../../../attendance/data/services/student_session_service.dart';
+import '../../domain/entities/enrollment.dart';
+import '../../../../../core/theme/app_theme.dart';
+
+class StudentDashboardPage extends StatefulWidget {
+  const StudentDashboardPage({super.key});
+
+  @override
+  State<StudentDashboardPage> createState() => _StudentDashboardPageState();
+}
+
+class _StudentDashboardPageState extends State<StudentDashboardPage> {
+  late final StudentSessionService _sessionService;
+  bool _attendanceMarked = false;
+  String? _lastMethod;
+
+  @override
+  void initState() {
+    super.initState();
+    _sessionService = StudentSessionService();
+    _sessionService.startListening();
+  }
+
+  @override
+  void dispose() {
+    _sessionService.dispose();
+    super.dispose();
+  }
+
+  void _markAttendance(String method) {
+    setState(() {
+      _attendanceMarked = true;
+      _lastMethod = method;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('✓ Attendance marked via $method!'),
+        backgroundColor: AppTheme.secondary,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final session = _sessionService.currentSession;
+
+    return BlocProvider(
+      create: (context) => EnrollmentCubit(),
+      child: Scaffold(
+        drawer: const StudentDrawer(),
+        backgroundColor: AppTheme.background,
+        appBar: AppBar(
+          title: const Text('Dashboard'),
+          centerTitle: false,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications_outlined),
+              onPressed: () {
+                Navigator.pushNamed(context, '/student/notifications');
+              },
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Welcome Banner
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppTheme.primary, AppTheme.primaryDark],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    const CircleAvatar(
+                      radius: 30,
+                      backgroundColor: Colors.white,
+                      child:
+                          Icon(Icons.person, size: 30, color: AppTheme.primary),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Welcome back,',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                          const Text(
+                            'Amara Mwangi',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            'CS/2021/0042',
+                            style:
+                                TextStyle(color: Colors.white.withOpacity(0.8)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Stats Row
+              const Row(
+                children: [
+                  Expanded(
+                      child: _StatCard(
+                          label: 'Attendance',
+                          value: '74%',
+                          icon: Icons.trending_up,
+                          color: AppTheme.primary)),
+                  SizedBox(width: 12),
+                  Expanded(
+                      child: _StatCard(
+                          label: 'Engagement',
+                          value: '0.61',
+                          icon: Icons.analytics,
+                          color: AppTheme.secondary)),
+                  SizedBox(width: 12),
+                  Expanded(
+                      child: _StatCard(
+                          label: 'Quizzes',
+                          value: '68%',
+                          icon: Icons.quiz,
+                          color: AppTheme.warning)),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Active Session
+              if (_attendanceMarked)
+                _buildSuccessCard()
+              else if (session != null && session.isActive)
+                _buildActiveSessionCard(session)
+              else
+                _buildNoSessionCard(),
+
+              const SizedBox(height: 20),
+
+              // My Courses
+              BlocBuilder<EnrollmentCubit, EnrollmentState>(
+                builder: (context, state) {
+                  if (state is EnrollmentLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (state is EnrollmentLoaded) {
+                    return _MyCoursesCard(enrollments: state.enrollments);
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+              // Upcoming Deadlines
+              _buildDeadlinesCard(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActiveSessionCard(ActiveSession session) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppTheme.primary, AppTheme.primaryDark],
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.play_circle_filled,
+                      color: Colors.white, size: 28),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Active Session',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        '${session.courseCode} - ${session.courseName}',
+                        style: TextStyle(color: Colors.white.withOpacity(0.9)),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppTheme.error,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'LIVE',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                _buildInfoChip(Icons.person, session.lecturer),
+                const SizedBox(width: 12),
+                _buildInfoChip(Icons.location_on, session.room),
+                const SizedBox(width: 12),
+                _buildInfoChip(
+                    Icons.access_time, session.formattedTimeRemaining),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => QRScannerPage(
+                                onSuccess: () => _markAttendance('QR'))),
+                      );
+                    },
+                    icon: const Icon(Icons.qr_code_scanner),
+                    label: const Text('Scan QR'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppTheme.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AccessCodeEntryPage(
+                                onSuccess: () =>
+                                    _markAttendance('Access Code'))),
+                      );
+                    },
+                    icon: const Icon(Icons.keyboard),
+                    label: const Text('Enter Code'),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.white),
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(IconData icon, String label) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 14, color: Colors.white70),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(color: Colors.white, fontSize: 12),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSuccessCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.secondary,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.check_circle, color: Colors.white, size: 32),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Attendance Recorded!',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'Marked present via $_lastMethod',
+                  style: TextStyle(color: Colors.white.withOpacity(0.9)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoSessionCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.divider),
+      ),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'No active session',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Wait for your lecturer to start a session',
+                style: TextStyle(color: AppTheme.textSecondary),
+              ),
+            ],
+          ),
+          Icon(Icons.snooze, size: 40, color: AppTheme.textSecondary),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeadlinesCard() {
+    final deadlines = [
+      {'title': 'CS401 Assignment 3', 'date': 'May 25, 2026', 'daysLeft': 2},
+      {'title': 'Database Systems CAT', 'date': 'May 28, 2026', 'daysLeft': 5},
+      {'title': 'Networks Project', 'date': 'Jun 5, 2026', 'daysLeft': 13},
+    ];
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              'Upcoming Deadlines',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const Divider(height: 1),
+          ...deadlines.map((deadline) => Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppTheme.warning.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.event, color: AppTheme.warning),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            deadline['title'] as String,
+                            style: const TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          Text(
+                            deadline['date'] as String,
+                            style: const TextStyle(
+                                fontSize: 11, color: AppTheme.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: (deadline['daysLeft'] as int) <= 3
+                            ? AppTheme.error.withOpacity(0.1)
+                            : AppTheme.secondary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${deadline['daysLeft']} days left',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: (deadline['daysLeft'] as int) <= 3
+                              ? AppTheme.error
+                              : AppTheme.secondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.divider),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MyCoursesCard extends StatelessWidget {
+  final List<Enrollment> enrollments;
+  const _MyCoursesCard({required this.enrollments});
+
+  @override
+  Widget build(BuildContext context) {
+    if (enrollments.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.divider),
+        ),
+        child: const Center(
+          child: Column(
+            children: [
+              Icon(Icons.menu_book, size: 48, color: AppTheme.textSecondary),
+              SizedBox(height: 8),
+              Text('No courses enrolled'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              'My Courses',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const Divider(height: 1),
+          ...enrollments.map((e) => _CourseTile(enrollment: e)),
+        ],
+      ),
+    );
+  }
+}
+
+class _CourseTile extends StatelessWidget {
+  final Enrollment enrollment;
+  const _CourseTile({required this.enrollment});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Text(
+                enrollment.unitCode.substring(0, 2),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primary,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${enrollment.unitCode} - ${enrollment.unitName}',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  enrollment.lecturer,
+                  style: const TextStyle(
+                      fontSize: 12, color: AppTheme.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: enrollment.isActive
+                  ? AppTheme.secondary.withOpacity(0.1)
+                  : AppTheme.warning.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              enrollment.isActive ? 'Active' : 'Deferred',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color:
+                    enrollment.isActive ? AppTheme.secondary : AppTheme.warning,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
